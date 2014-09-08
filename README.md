@@ -5,6 +5,8 @@ Every Chef installation needs a Chef Repository. This is the place where cookboo
 
 While we prefer Git, and make this repository available via GitHub, you are welcome to download a tar or zip archive and use your favorite version control system to manage the code.
 
+
+
 Repository Directories
 ======================
 
@@ -16,6 +18,7 @@ This repository contains several directories, and each directory contains a READ
 * `data_bags/` - Store data bags and items in .json in the repository.
 * `roles/` - Store roles in .rb or .json in the repository.
 
+    
 Rake Tasks
 ==========
 
@@ -41,6 +44,8 @@ The following tasks duplicate functionality from knife and may be removed in a f
 * `upload_cookbooks` - replaced by `knife cookbook upload -a`.
 * `upload_cookbook[cookbook]` - replaced by `knife cookbook upload COOKBOOK`.
 
+    
+    
 Configuration
 =============
 
@@ -60,7 +65,9 @@ The second config file, `.chef/knife.rb` is a repository specific configuration 
 
 http://docs.opscode.com/knife.html
 
+
 Next Steps
 ==========
 
 Read the README file in each of the subdirectories for more information about what goes in those directories.
+
