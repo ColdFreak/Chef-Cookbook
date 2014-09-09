@@ -11,6 +11,8 @@ https://manage.opscode.comから二つのpemファイルをダウンロードし
 knife.rbファイルを生成する。chef-repo/.chefディレクトリに配置する  
 
 
+
+
 ----
 
 WorkStation(クックブック作る作業場)にknifeコマンドがインストールされていることを確認する
@@ -19,11 +21,15 @@ WorkStation(クックブック作る作業場)にknifeコマンドがインス�
         Chef: 11.14.6
 
 
+
+
 ----
 
 リモートのChefサーバにあるクライアントリストを表示する
 
         $ knife client list
+
+
 
         tera-validator
 ----
@@ -48,6 +54,7 @@ knifeでbootstrapを実行する。bootstrapの目的はnodeにchef-clientをイ
           LogLevel FATAL
 
 
+
 ----
 
 node1に入ってchef-clientをインストール済みことを確認する
@@ -62,12 +69,14 @@ node1に入ってchef-clientをインストール済みことを確認する
         validation_client_name "tera-validator"
         node_name "node1"
 
+
 ----
 
 chef-repoディレクトリ下にapacheという名前のクックブックを作成する  
 cookbooksディレクトリの下にapacheディレクトリができるはず
 
         $ knife cookbook create apache
+
 
 ----
 
@@ -86,6 +95,7 @@ cookbooks/apache/recipes/default.rbに記入する
 > perform the how Chef use s the **platform** the node 
 > is running to dertermine the correct provider for a resource
 
+
 ----
 
  cookbooks/apache/recipes/default.rbに二つ目のresourceを記入する  
@@ -96,6 +106,7 @@ cookbooks/apache/recipes/default.rbに記入する
 注意：  
 > Resources are executed in order
 
+
 ----
 
 cookbooks/apache/recipes/default.rbに三つ目のresourceを記入する  
@@ -105,12 +116,14 @@ cookbooks/apache/recipes/default.rbに三つ目のresourceを記入する
             mode "0644"
         end
 
+
 ----
 
 templates/default/下にindex.html.erbファイルを作成する  
 簡単なhtmlコードを記入する  
 
         <h1>Hello, world</h1>
+
 
 ----
 
@@ -127,6 +140,7 @@ chef-repo ディレクトリからローカルのapacheクックブックをChef
         Do you really want to delete apache version 0.2.0? (Y/N)y
         Deleted cookbook[apache version 0.2.0]
 
+
 ----
 
 node1に対して、run_listに実行してほしいrecipeを指定する。
@@ -139,6 +153,8 @@ node1に対して、run_listに実行してほしいrecipeを指定する。
 > The Run List is the ordered set of recipes and roles that the 
 > Chef Client will execute on a node
 > Recipes are specified by "recipe[name]"
+
+
 
 ----
 
