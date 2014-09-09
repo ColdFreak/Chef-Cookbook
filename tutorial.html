@@ -1,0 +1,165 @@
+<h1 id="準備">準備</h1>
+
+<p>github.comからchef-repoをダウンロードする</p>
+
+<pre><code>    $ git clone git://github.com/opscode/chef-repo.git
+</code></pre>
+
+<hr />
+
+<p>https://manage.opscode.comから二つのpemファイルをダウンロードしてから<br/>
+knife.rbファイルを生成する。chef-repo/.chefディレクトリに配置する </p>
+
+<hr />
+
+<p>knifeコマンドがインストールされていることを確認する</p>
+
+<pre><code>    $ knife --version
+    Chef: 11.14.6
+</code></pre>
+
+<hr />
+
+<p>リモートのChefサーバにあるクライアントリストを表示する</p>
+
+<pre><code>    $ knife client list
+
+    tera-validator
+</code></pre>
+
+<hr />
+
+<p>knifeでbootstrapを実行する。bootstrapの目的はnodeにchef-clientをインストールして、<br/>
+リモートのChef サーバーにnode1という名前でこのnodeを登録する。 </p>
+
+<pre><code>    $ knife bootstrap localhost --sudo -x vagrant -P vagrant --ssh-port 2222 -N node1
+</code></pre>
+
+<p>上のコマンドのport 2222はどこから来ているかを確認する</p>
+
+<pre><code>    $ vagrant ssh-config
+    Host default
+      HostName 127.0.0.1
+      User vagrant
+      Port 2222
+      UserKnownHostsFile /dev/null
+      StrictHostKeyChecking no
+      PasswordAuthentication no
+      IdentityFile /Users/wang/.vagrant.d/insecure_private_key
+      IdentitiesOnly yes
+      LogLevel FATAL
+</code></pre>
+
+<hr />
+
+<p>node1に入ってchef-clientをインストール済みことを確認する</p>
+
+<pre><code>    $ chef-client -v
+    Chef: 11.16.0
+
+    $ cd /etc/chef &amp;&amp; cat client.rb
+    /etc/chef$ cat client.rb
+    log_location     STDOUT
+    chef_server_url  &quot;https://api.opscode.com/organizations/tera&quot;
+    validation_client_name &quot;tera-validator&quot;
+    node_name &quot;node1&quot;
+</code></pre>
+
+<hr />
+
+<p>chef-repoディレクトリ下にapacheという名前のクックブックを作成する<br/>
+cookbooksディレクトリの下にapacheディレクトリができるはず</p>
+
+<pre><code>    $ knife cookbook create apache
+</code></pre>
+
+<hr />
+
+<p>cookbooks/apache/recipes/default.rbに記入する </p>
+
+<pre><code>    package &quot;apache2&quot; do
+        action :install
+    end
+</code></pre>
+
+<p>注意: </p>
+
+<blockquote>
+<p>Resources are declarative - that means
+we say what we want to have happen,
+rather than how</p>
+
+<p>Resources take action through Providers - providers
+perform the how Chef use s the <strong>platform</strong> the node
+is running to dertermine the correct provider for a resource</p>
+</blockquote>
+
+<hr />
+
+<p>cookbooks/apache/recipes/default.rbに二つ目のresourceを記入する </p>
+
+<pre><code>    service &quot;apache2&quot; do
+        action [:enable, :start]
+    end
+</code></pre>
+
+<p>注意： </p>
+
+<blockquote>
+<p>Resources are executed in order</p>
+</blockquote>
+
+<hr />
+
+<p>cookbooks/apache/recipes/default.rbに三つ目のresourceを記入する </p>
+
+<pre><code>    template &quot;var/www/html/index.html&quot; do
+        source &quot;index.html.erb&quot;
+        mode &quot;0644&quot;
+    end
+</code></pre>
+
+<hr />
+
+<p>templates/default/下にindex.html.erbファイルを作成する<br/>
+簡単なhtmlコードを記入する </p>
+
+<pre><code>    &lt;h1&gt;Hello, world&lt;/h1&gt;
+</code></pre>
+
+<hr />
+
+<p>chef-repo ディレクトリからローカルのapacheクックブックをChefサーバーにアップロードする</p>
+
+<pre><code>    $ knife cookbook upload apache
+    Uploading apache         [0.1.0]
+    Uploaded 1 cookbook.
+</code></pre>
+
+<p>注意： </p>
+
+<blockquote>
+<p>Chefサーバーのクックブックを削除する.&#8217;0.2.0&#8217;はクックブックのバージョンを指定する</p>
+</blockquote>
+
+<pre><code>    $ knife cookbook delete apache 0.2.0
+    Do you really want to delete apache version 0.2.0? (Y/N)y
+    Deleted cookbook[apache version 0.2.0]
+</code></pre>
+
+<hr />
+
+<p>node1に対して、run_listに実行してほしいrecipeを指定する。</p>
+
+<pre><code>    $ knife node run_list add node1 &quot;recipe[apache]&quot;
+    node1:
+      run_list: recipe[apache]
+</code></pre>
+
+<p>注意：</p>
+
+<blockquote>
+<p>The Run List is the ordered set of recipes and roles that the
+Chef Client will execute on a node
+Recipes are specified by &#8220;recipe[name]&#8221;</p>
+</blockquote>
