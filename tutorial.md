@@ -242,3 +242,13 @@ node1にログインして、chef-clientを実行する。これで'Hello, my fr
 
         $ vagrant ssh
         $ sudo chef-client
+
+注意：
+> 今追加したnode1に関するattributeをknifeでチェックするには下のコマンドを使う
+
+        $ knife node show node1 -a apache
+        node1:
+          apache:
+            greeting: my friend
+
+
