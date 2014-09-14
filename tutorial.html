@@ -24,8 +24,6 @@ knife.rbファイルを生成する。chef-repo/.chefディレクトリに配置
 
 <pre><code>    $ knife client list
 
-
-
     tera-validator
 </code></pre>
 
@@ -181,3 +179,64 @@ Recipes are specified by &#8220;recipe[name]&#8221;</p>
 <p>これで、ブラウザーを立ち上げて、node1のIPアドレスを入れたら、
 &#8217;Hello, world&#8217;というメッセージだけのウェブページが表示されるはず</p>
 </blockquote>
+
+<hr />
+
+<p>nodeのhostnameという属性を取得するそして、ウェブページに反映する
+cookbooks/apache/templates/default/index.html.erlファイルに下の
+内容を追加</p>
+
+<pre><code>    &lt;p&gt; My name is &lt;%= node['hostname'] %&gt; &lt;/p&gt;
+</code></pre>
+
+<hr />
+
+<p>更新されたapacheクックブックをアップロードする</p>
+
+<pre><code>    $ knife cookbook upload apache
+</code></pre>
+
+<p>node1にログインして、chef-clientを実行する. </p>
+
+<pre><code>    $ vagrant ssh
+    $ sudo chef-client
+</code></pre>
+
+<p>注意：</p>
+
+<blockquote>
+<p>このhostnameがどこから来ているかというとohaiから来ている。
+ohaiはシステムの大量の情報を集めている。
+node1に$ ohai | grep hostname コマンドを実行したら, ウェブページ
+に反映しているhostnameと一致していることが分かる。
+直接 $ ohai hostname を実行してもいい</p>
+</blockquote>
+
+<hr />
+
+<p>knifeコマンドでnode1に関する基本情報を表示させることができる
+下のコマンドはローカルのvagrantバーチャルマシンの情報を表示させている。</p>
+
+<pre><code>    $ knife node show node1
+    Node Name:   node1
+    Environment: _default
+    FQDN:        vagrant-ubuntu-trusty-64
+    IP:          10.0.2.15
+    Run List:    recipe[apache]
+    Roles:
+    Recipes:     apache, apache::default
+    Platform:    ubuntu 14.04
+    Tags:
+</code></pre>
+
+<p>注意：</p>
+
+<blockquote>
+<p>node1のhostnameををチェックするもう一つの方法は下のコマンドを使用すること。
+&#8217;-a&#8217;はattributeのこと</p>
+</blockquote>
+
+<pre><code>    $ knife node show node1 -a hostname
+    node1:
+      hostname: vagrant-ubuntu-trusty-64
+</code></pre>
