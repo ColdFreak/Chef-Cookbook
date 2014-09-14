@@ -225,7 +225,20 @@ knifeコマンドでnode1に関する基本情報を表示させることがで�
         node1:
           hostname: vagrant-ubuntu-trusty-64
 
+----
 
+node1がたくさんの属性(attribute)があって、それ以外に自分で定義することもできる  
+cookbooks/apache/attributes/の下にdefautl.rbファイルを作成して、追加属性を定義する
 
+        default['apache']['greeting'] = "my friend"
 
+上の属性をウェブページに反映するにはcookbooks/apache/templates/default/index.html.erb  
+に下の一行を追加
 
+        <h1>Hello, <%= node['apache']['greeting'] %> </h1>
+
+node1にログインして、chef-clientを実行する。これで'Hello, my friend'というメッセージが  
+ウェブページに反映されるはず
+
+        $ vagrant ssh
+        $ sudo chef-client

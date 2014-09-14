@@ -240,3 +240,24 @@ node1に$ ohai | grep hostname コマンドを実行したら, ウェブペー�
     node1:
       hostname: vagrant-ubuntu-trusty-64
 </code></pre>
+
+<hr />
+
+<p>node1がたくさんの属性(attribute)があって、それ以外に自分で定義することもできる<br/>
+cookbooks/apache/attributes/の下にdefautl.rbファイルを作成して、追加属性を定義する</p>
+
+<pre><code>    default['apache']['greeting'] = &quot;my friend&quot;
+</code></pre>
+
+<p>上の属性をウェブページに反映するにはcookbooks/apache/templates/default/index.html.erb<br/>
+に下の一行を追加</p>
+
+<pre><code>    &lt;h1&gt;Hello, &lt;%= node['apache']['greeting'] %&gt; &lt;/h1&gt;
+</code></pre>
+
+<p>node1にログインして、chef-clientを実行する。これで&#8217;Hello, my friend&#8217;というメッセージが<br/>
+ウェブページに反映されるはず</p>
+
+<pre><code>    $ vagrant ssh
+    $ sudo chef-client
+</code></pre>
