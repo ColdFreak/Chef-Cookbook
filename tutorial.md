@@ -306,9 +306,9 @@ node1にログインして、chef-clientを実行して、修正を反映する�
         $ vagrant ssh
         $ sudo chef-client
 注意：
-> RoleはAttributeより優先順位が高い
-> Attributeは複数の場所で設定可能
-> 特定の用途のため、roleを利用して、Attributeを設定するのはいい考え
+> RoleはAttributeより優先順位が高い  
+> Attributeは複数の場所で設定可能  
+> 特定の用途のため、roleを利用して、Attributeを設定するのはいい考え  
 > Roles must have a name  
 > Roles may have a description  
 > Roles may have a run_list, just like a node  

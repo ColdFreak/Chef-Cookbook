@@ -337,7 +337,10 @@ node1にログインして、chef-clientを実行して、修正を反映する�
 <p>注意：</p>
 
 <blockquote>
-<p>Roles must have a name<br/>
+<p>RoleはAttributeより優先順位が高い<br/>
+Attributeは複数の場所で設定可能<br/>
+特定の用途のため、roleを利用して、Attributeを設定するのはいい考え<br/>
+Roles must have a name<br/>
 Roles may have a description<br/>
 Roles may have a run_list, just like a node<br/>
 Roles may set node attributes like &#8216;default_attributes&#8217; or &#8216;override_attributes&#8217; </p>
