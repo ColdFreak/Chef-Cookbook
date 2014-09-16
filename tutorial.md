@@ -252,3 +252,64 @@ node1にログインして、chef-clientを実行する。これで'Hello, my fr
             greeting: my friend
 
 
+----
+
+これからroleに関して、みていく。簡単にいえば、このnodeをWebサーバーとして
+みているか、DBサーバーとしてみているか、モニタリングサーバーとしてみているかのこと。  
+roles/の下にwebserver.jsonファイルを作成  
+roleごとに名前が必要、下の内容を記入  
+
+        {
+            "name" : "webserver",
+            "default_attributes" : {
+                "apache" : {
+                    "greeting" : "Webinar"
+                }
+            },
+            "run_list" : [
+                "recipe[apache]"
+            ]
+        }
+
+今の作ったroleをChefサーバーにアップロードする  
+
+        $ knife role from file webserver.json
+
+そして今からnode1のrun_listを修正したい。node1のrun_list  
+というのはChef サーバー保存されているnode1に関するrun_listの情報
+
+        $ knife node show node1
+        Node Name:   node1
+        Environment: _default
+        FQDN:        vagrant-ubuntu-trusty-64
+        IP:          10.0.2.15
+        Run List:    recipe[apache]
+        Roles:
+        Recipes:     apache, apache::default
+        Platform:    ubuntu 14.04
+        Tags:
+
+Run Listの中のrecipe[apache]を削除して、その代わりにさっき作った  
+roleを指定したい。さっきの作ったroleの中にrun_listが書かれているので  
+問題ない  
+
+        $ knife node run list remove node1 "recipe[apache]"
+        node1:
+          run_list:
+        $ knife node run list add node1 "role[webserver]"
+        node1:
+          run_list: role[webserver]
+上のコマンドはなにをしたかというとChef サーバーにあるnode1に関するrun_listの
+元の'recipe[apache]'を削除して、新しく'role[webserver]'を追加した。  
+node1にログインして、chef-clientを実行して、修正を反映する。
+
+        $ vagrant ssh
+        $ sudo chef-client
+注意：
+> RoleはAttributeより優先順位が高い
+> Attributeは複数の場所で設定可能
+> 特定の用途のため、roleを利用して、Attributeを設定するのはいい考え
+> Roles must have a name  
+> Roles may have a description  
+> Roles may have a run_list, just like a node  
+> Roles may set node attributes like 'default_attributes' or 'override_attributes'  
