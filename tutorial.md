@@ -51,9 +51,10 @@ knifeでbootstrapを実行する。bootstrapの目的はnodeにchef-clientをイ
           IdentitiesOnly yes
           LogLevel FATAL
 
-
-
-
+注意：
+> ローカルホストに複数のvagrantバーチャルマシン動いている場合は
+> $ vagrant ssh-config コマンドでport 番号を確認して、それぞれの
+> vagrant ホストをbootstrapすればよい
 
 ----
 
@@ -313,3 +314,121 @@ node1にログインして、chef-clientを実行して、修正を反映する�
 > Roles may have a description  
 > Roles may have a run_list, just like a node  
 > Roles may set node attributes like 'default_attributes' or 'override_attributes'  
+
+----
+
+引き続きdata bagのことを遣って行く  
+data_bags/の下にvhostsというディレクトリを作成して、
+さらにdata_bags/vhosts/の下にbears.jsonとclowns.json二つのファイルを作成。中身は下に書いてある。  
+
+        
+        {
+          "id" : "bear",
+          "port" : 80
+        }
+        ------------------
+        {
+          "id" : "clowns",
+          "port" : 81
+        }
+
+そして、data bagをChefサーバーにアップロードする
+
+        $ knife upload data_bags/vhosts/
+
+----
+
+これから新しいrecipeを作成する  
+cookbooks/apache/recipes/の下にvhosts.rbファイルを作成, 中身は下に書いてある
+
+        data_bag("vhosts").each do |site|
+            site_data = data_bag_item("vhosts", site)
+            site_name = site_data["id"]
+            document_root = "/var/www/#{site_name}"
+
+            template "/etc/apache2/sites-available/#{site_name}.conf" do
+                source "custom-vhosts.erb"
+                mode "0644"
+                variables(
+                    :document_root => document_root,
+                    :port => site_data["port"]
+                )
+                notifies :restart, "service[apache2]"
+            end
+
+            directory document_root do
+                mode "0755"
+                recursive true
+            end
+
+            template "#{document_root}/index.html" do
+                source "index.html.erb"
+                mode "0644"
+                variables(
+                    :site_name => site_name,
+                    :port   => site_data["port"]
+                )
+            end
+        end
+
+----
+
+次にcookbooks/apache/templates/default/の下にcustom-vhosts.erbファイルを作成する。中身は下に書いてある
+
+        <% if @port != 80 %>
+            Listen <%= @port %>
+        <% end %>
+
+        <VirtualHost *:<%= @port %>>
+            ServerAdmin webmaster@localhost
+
+            DocumentRoot <%= @document_root %>
+            <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+            </Directory>
+
+            <Directory <%= @document_root %>>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Order allow,deny
+                Allow from all
+            </Directory>
+
+        </VirtualHost>
+
+そして、cookbooks/apache/templates/default/index.html.erbファイルに下の内容を追加
+
+    <p>We love <%= @site_name %></p>
+    <p>Served from <%= node['idaddress'] %>:<%= @port %></p>
+
+ローカルのapacheクックブックとリモートのChefサーバーのapacheクックブックと比較する
+
+        $ knife diff cookbooks/apache
+
+最後にcookbooks/apache/metadata.rbのversion項目を0.1.0から0.2.0に変更、つまりヴァージョンアップすることを明示的にする。  
+
+apacheクックブックをアップロードする
+
+        $ knife cookbook upload apache
+        Uploading apache         [0.2.0]
+        Uploaded 1 cookbook.
+
+cookbooks/apache/roles/webser.jsonファイルのrun_listにrecipe[apache::vhosts]を追加
+        
+         {
+             "name" : "webserver",
+             "default_attributes" : {
+                 "apache" : {
+                     "greeting" : "Webinar"
+                 }
+             },
+             "run_list" : [
+                 "recipe[apache]",
+                 "recipe[apache::vhosts]"
+             ]
+         }
+
+roleをChefサーバーにアップロードする
+
+        $ knife role from file webserver
